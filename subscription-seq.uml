@@ -1,0 +1,74 @@
+@startuml
+title SomeTrails Subscription Management
+actor User
+participant "SomeTrails"          as ST
+participant "Settings"            as SET
+participant "Subscription Page"   as SP
+participant "Tier Selector"       as TS
+participant "Payment Form"        as PF
+participant "Payment Processor"   as PAY
+participant "Subscription Service"    as SUB
+participant "User Database"       as DB
+participant "Email Service"       as ES
+
+== Access Subscription ==
+User -> ST   : Navigate to Settings
+ST   -> SET  : Open settings menu
+User -> SET  : Select "Manage Subscription"
+SET  -> SP   : Open subscription page
+SP   -> SUB  : Fetch current tier
+SUB  -> DB   : Query user subscription
+DB   --> SUB : Return tier info
+SUB  --> SP  : Display current tier + options
+
+== Upgrade Subscription ==
+User -> SP   : Select "Upgrade"
+SP   -> TS   : Show available upgrade tiers
+TS   --> User: Present Plus / Peak options
+User -> TS   : Select target tier
+TS   -> PF   : Request payment info
+
+alt Credit Card
+    User -> PF   : Enter card details
+    PF   -> PAY  : Submit card for processing
+else PayPal / Stripe
+    User -> PF   : Select processor
+    PF   -> PAY  : Redirect to processor
+    PAY  --> User: Authenticate on processor
+    User -> PAY  : Authorize payment
+end
+
+PAY  --> SUB : Payment confirmed
+SUB  -> DB   : Update subscription tier
+DB   --> SUB : Updated
+SUB  -> ES   : Send receipt email
+ES   --> User: Deliver receipt
+SUB  --> ST  : Refresh with new tier access
+
+== Cancel Subscription ==
+User -> SP   : Select "Cancel"
+SP   -> SUB  : Check current tier
+SUB  --> SP  : Return tier
+
+alt Base User
+    SP   --> User: Nothing to cancel
+else Plus or Peak User
+    SP   --> User: Show confirmation prompt
+    User -> SP   : Confirm cancellation
+    SP   --> User: Request cancellation reason
+    User -> SP   : Submit reason
+    SP   -> SUB  : Process cancellation
+    SUB  -> PAY  : Cancel recurring billing
+    PAY  --> SUB : Cancellation confirmed
+    SUB  -> DB   : Update subscription status
+    DB   --> SUB : Updated
+    SUB  -> ES   : Send cancellation email
+    ES   --> User: Deliver confirmation
+    SUB  --> SP  : Confirm cancellation
+end
+
+== Exit ==
+User -> SP   : Select "Exit"
+SP   --> ST  : Return to logged-in site
+
+@enduml

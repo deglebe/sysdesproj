@@ -1,23 +1,73 @@
 @startuml
+title SomeTrails Login / Register
+actor User
+participant "SomeTrails"         as ST
+participant "Auth Page"          as AP
+participant "Login Form"         as LF
+participant "Register Form"      as RF
+participant "Auth Server"        as AS
+participant "User Database"      as DB
+participant "Email Service"      as ES
+participant "Subscription Svc"   as SUB
+participant "Session Manager"    as SM
 
-title "SomeTrails Login/Register Sequence"
+== Navigate to Auth ==
+User -> ST   : Navigate to SomeTrails
+ST   -> SM   : Check for active session
+SM   --> ST  : No active session
+ST   -> AP   : Show auth page
 
-start
-:Navigate to SomeTrails;
-if (Logged In?) then (true)
+== Existing User - Log In ==
+User -> AP   : Select "Log In"
+AP   -> LF   : Display login form
+User -> LF   : Enter email and password
+LF   -> AS   : Submit credentials
+AS   -> DB   : Verify credentials
+DB   --> AS  : Credentials valid
+AS   -> SM   : Create session
+SM   --> AS  : Session token
+AS   --> LF  : Login success
+LF   --> ST  : Redirect to logged-in site
 
-else (false)
-    if (Existing Customer) then (true)
-        :Log In;
-    else (false)
-        :Register;
-    endif
+== Failed Login ==
+User -> LF   : Enter invalid credentials
+LF   -> AS   : Submit credentials
+AS   -> DB   : Verify credentials
+DB   --> AS  : Invalid
+AS   --> LF  : Return error
+LF   --> User: Show error message
 
-    :Offer/Manage Subscription;
-endif
+== New User - Register ==
+User -> AP   : Select "Register"
+AP   -> RF   : Display registration form
+User -> RF   : Enter email, password, username
+RF   -> AS   : Submit registration
+AS   -> DB   : Check email uniqueness
+DB   --> AS  : Email available
+AS   -> DB   : Create user record
+DB   --> AS  : User created
+AS   -> ES   : Send verification email
+ES   --> User: Deliver verification link
+AS   -> SM   : Create session
+SM   --> AS  : Session token
+AS   --> RF  : Registration success
 
-:Show logged-in site\n(at subscription level);
+== Offer Subscription ==
+RF   -> SUB  : Initiate subscription offer
+SUB  --> User: Present tier options (Base/Plus/Peak)
+User -> SUB  : Select tier
+SUB  --> ST  : Redirect to logged-in site
 
-stop
+== Password Reset ==
+User -> LF   : Click "Forgot password"
+LF   -> AS   : Request reset
+AS   -> DB   : Lookup email
+DB   --> AS  : User found
+AS   -> ES   : Send reset email
+ES   --> User: Deliver reset link
+User -> AS   : Submit new password via link
+AS   -> DB   : Update password hash
+DB   --> AS  : Updated
+AS   --> User: Confirm reset
 
 @enduml

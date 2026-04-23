@@ -1,0 +1,48 @@
+@startuml
+title AllTrails Sequence Diagram -- shop pages
+
+actor "AllTrails User" as user
+participant "Alltrails Website" as site
+participant "Compare Plans page" as plans
+participant "Gift Membership page" as gift
+participant "Member Deals page" as member
+participant "Gear Shop" as gear
+participant "Subscription checkout page" as subCheckout
+participant "Gear Shop checkout page" as gearCheckout
+participant "Payment Service" as Pay
+
+== navigation ==
+user -> site: navigate to shop dropdown
+site -> plans: navigate to subscription plan page
+site -> gift: navigate to gift subscription page
+site -> member: navigate to member deals page
+site -> gear: navigate to gear shop
+
+== buying membership==
+user -> plans: select plan
+plans -> subCheckout: selects to start free trial
+user -> subCheckout: enter payment details
+subCheckout --> Pay: veryify card details
+Pay --> subCheckout: Process payment
+user <- subCheckout: update user permissions
+
+== gifting membership==
+user -> gift: select to purchase gift
+gift -> user: enter gift reciever details
+gift -> subCheckout: select to continue
+user -> subCheckout: enter payment details
+subCheckout --> Pay: veryify card details
+Pay --> subCheckout: Process payment
+
+== exploring member deals ==
+user -> member: enter credentials
+member -> site: verify credentials
+
+== gear store ==
+user -> gear: add product to cart
+gear -> gearCheckout: navigates to checkout
+user -> gearCheckout: enter payment details
+gearCheckout -> Pay: veryify card details
+Pay -> gearCheckout: Process payment
+
+@enduml

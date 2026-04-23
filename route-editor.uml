@@ -1,0 +1,36 @@
+@startuml
+title SomeTrails Route Editor
+
+actor User
+participant "SomeTrails" as ST
+participant "Trail Editor" as TE
+participant "Snap/Draw" as SDM
+participant "Uploader" as UP
+participant "Waypoints" as POI
+
+participant "Route Info Preview" as RPI
+participant "Route Preview" as RP
+participant "Exporter" as E
+participant "Route Submission" as SNR
+
+== Creating a Trail - Auth Required ==
+
+User -> ST : Navigate to Explore Dropdown
+ST --> TE : Switch to Trail Editor
+User -> TE : Select Mode
+TE --> SDM : Mode Switch/Interact
+SDM --> TE : Reflect Changes
+TE --> UP : Mode Upload
+UP --> TE : Reflect Changes
+TE --> POI : Mode Add Waypoints
+POI --> TE : Reflect Changes
+
+== Save/Publish ==
+
+User -> TE : Accessing Existing Editor Instance
+TE -> RPI : User clicked "Save"
+RPI --> RP : User clicked "Preview Route"
+RPI --> E : Export GPX/TCX format
+RPI --> SNR : Formally suggest new trail
+
+@enduml

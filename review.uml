@@ -1,0 +1,26 @@
+@startuml
+title "Leave a Review"
+start
+
+:Navigate to SomeTrails;
+
+:Find Trail;
+
+:Click on "Review Trail";
+if ( If Logged In ) then ( Yes )
+else ( no )
+    :Login / Register;
+endif
+
+:Give stars;
+:Add Tags;
+:Add Comments & Pics;
+:Rate Difficulty w/ tags;
+:Rate Parking;
+:Note Conditions;
+:Give activity type, and date;
+:Submit;
+
+
+stop
+@enduml

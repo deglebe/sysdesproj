@@ -1,0 +1,24 @@
+@startuml
+title SomeTrails Log In
+actor User
+participant "SomeTrails"    as ST
+participant "Login Form"    as LF
+participant "Auth Server"   as AS
+participant "User Database" as DB
+
+User -> ST  : Navigate to SomeTrails
+ST   -> LF  : Display login form
+User -> LF  : Enter email and password
+LF   -> AS  : Submit credentials
+AS   -> DB  : Verify credentials
+DB   --> AS : Credentials valid
+AS   --> LF : Login success
+LF   --> ST : Redirect to logged-in site
+ST   --> User : Show logged-in site
+
+note right of AS
+  Invalid credentials return
+  an error to the form.
+end note
+
+@enduml

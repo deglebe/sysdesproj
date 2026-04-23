@@ -1,0 +1,23 @@
+@startuml
+
+title "SomeTrails Login/Register Sequence"
+
+start
+:Navigate to SomeTrails;
+if (Logged In?) then (true)
+
+else (false)
+    if (Existing Customer) then (true)
+        :Log In;
+    else (false)
+        :Register;
+    endif
+
+    :Offer/Manage Subscription;
+endif
+
+:Show logged-in site\n(at subscription level);
+
+stop
+
+@enduml

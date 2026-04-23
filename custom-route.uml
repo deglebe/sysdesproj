@@ -1,0 +1,41 @@
+@startuml
+title "sometrails create custom route";
+start
+
+if (click create custom route) then (clicked)
+    :click on map;
+        fork
+        :add segment;
+        fork again
+        :delete segment;
+        fork again
+        :change segment color;
+        end fork
+
+elseif (add a waypoint) then (clicked)
+    :click on create points of interest;
+        fork
+        :name waypoint;
+        fork again
+        :waypoint description;
+        fork again
+        :waypoint coordinates;
+        fork again
+        :toggle visibility;
+        end fork
+elseif (upload a route) then (clicked)
+    :Upload a route;
+    :browse or select file;
+elseif (edit route properties) then (clicked)
+    fork
+    :Set route name;
+    fork again
+    :Edit route description;
+    fork again
+    :set route visibility;
+    end fork
+endif
+    :save route;
+
+stop
+@enduml

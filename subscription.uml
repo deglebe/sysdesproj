@@ -1,0 +1,47 @@
+@startuml
+title "Manage Subscription"
+
+start
+
+switch ( Manage Subscription )
+
+case ( Upgrade )
+    if ( Peak User ) then ( Yes )
+    else ( No )
+        fork
+            :Plus User;
+            :Offer Peak;
+            fork again
+                :Base User;
+                fork
+                    :Offer Peak;
+                fork again
+                    :Offer Plus;
+            end fork
+        end fork
+        if ( Ask Payment Info ) then ( Credit Card )
+            :Gather information;
+        else ( Paypal or Stripe )
+            :Redirect to processor;
+        endif
+    endif
+
+case ( Cancel )
+    if ( Base User ) then ( Yes )
+    else ( No )
+        fork
+            :Peak User;
+        fork again
+            :Plus User;
+        end fork
+        if ( Confirm ) then ( Yes )
+            :Ask reasoning;
+            :Cancel Subscription;
+        else ( No )
+        endif
+    endif
+
+case ( Exit )
+endswitch
+stop
+@enduml

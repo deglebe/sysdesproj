@@ -1,0 +1,25 @@
+@startuml
+title SomeTrails Trail Search
+
+actor User
+
+participant "Explore Trails" as Explore
+participant "Search Bar" as Search
+participant "Map" as Map
+participant "Trail Info Display" as Display
+participant "Trails Storage Server" as Trails
+
+== Explore Trails ==
+User -> Explore: Request filtering for trails
+Explore -> Trails: Filter trails
+Trails -> Display: Display all trails filtered
+Map -> Explore: Highlight trails
+Explore -> User: Request input
+== Search Specific Trail ==
+User -> Search: Request trail information
+Search -> Trails: Get trail information
+Trails -> Display: Display trail information
+Display -> Map: Move to trail location
+Map -> User: Request input
+
+@enduml

@@ -1,0 +1,27 @@
+@startuml
+title SomeTrails Register
+actor User
+participant "SomeTrails"        as ST
+participant "Register Form"     as RF
+participant "Auth Server"       as AS
+participant "User Database"     as DB
+participant "Email Service"     as ES
+participant "Subscription Service"  as SUB
+
+User -> ST  : Navigate to SomeTrails
+ST   -> RF  : Display register form
+User -> RF  : Enter email, username, password
+RF   -> AS  : Submit registration
+AS   -> DB  : Check email uniqueness
+DB   --> AS : Email available
+AS   -> DB  : Create user record
+DB   --> AS : User created
+AS   -> ES  : Send verification email
+ES   --> User : Deliver verification link
+AS   --> RF : Registration success
+RF   -> SUB : Offer subscription
+SUB  --> User : Present tier options
+User -> SUB : Select tier (or skip)
+SUB  --> ST : Redirect to logged-in site
+
+@enduml

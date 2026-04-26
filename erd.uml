@@ -1,0 +1,332 @@
+@startuml
+title SomeTrails ERD
+
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 60
+skinparam padding 4
+hide circle
+
+'  USER
+entity "User" as USER {
+  * user_id <<PK>>
+  --
+  * username
+  * email
+  * password_hash
+  display_name
+  email_verified
+}
+
+'  AUTH
+
+together {
+  entity "PasswordReset" as RESET {
+    * reset_id <<PK>>
+    --
+    * user_id <<FK>>
+    * token
+    * expires_at
+    used
+  }
+
+  entity "EmailLog" as EMAIL {
+    * email_id <<PK>>
+    --
+    * user_id <<FK>>
+    * type
+    * status
+  }
+}
+
+'  SUBSCRIPTION CLUSTER
+'  Tier -> Sub <- User, Tier -> Deal
+'  Sub -> PaymentMethod -> Payment -> Gift
+
+together {
+  entity "Tier" as TIER {
+    * tier_id <<PK>>
+    --
+    * name
+    * price_monthly
+    price_annual
+  }
+
+  entity "Deal" as DEAL {
+    * deal_id <<PK>>
+    --
+    * min_tier_id <<FK>>
+    * title
+    * discount_pct
+    active
+  }
+}
+
+together {
+  entity "Subscription" as SUB {
+    * sub_id <<PK>>
+    --
+    * user_id <<FK>>
+    * tier_id <<FK>>
+    * method_id <<FK>>
+    * status
+    start_date
+    end_date
+    cancel_reason
+  }
+
+  entity "PaymentMethod" as PMETH {
+    * method_id <<PK>>
+    --
+    * user_id <<FK>>
+    * type
+    last_four
+    is_default
+  }
+}
+
+together {
+  entity "Payment" as PAY {
+    * payment_id <<PK>>
+    --
+    * method_id <<FK>>
+    sub_id <<FK>>
+    * amount
+    * status
+  }
+
+  entity "Gift" as GIFT {
+    * gift_id <<PK>>
+    --
+    * tier_id <<FK>>
+    * payment_id <<FK>>
+    * recipient_email
+    redeemed
+  }
+}
+
+'  TRAIL CLUSTER
+'  User -> Trail -> Geo, Segments, Tags,
+'  Waypoints, Reviews
+
+entity "Trail" as TRAIL {
+  * trail_id <<PK>>
+  --
+  * created_by <<FK>>
+  * name
+  description
+  * difficulty
+  length
+  elevation
+  trail_type
+  * visibility
+  * status
+  avg_rating
+}
+
+together {
+  entity "TrailGeometry" as GEO {
+    * geo_id <<PK>>
+    --
+    * trail_id <<FK>>
+    * geom
+    source
+  }
+
+  entity "Segment" as SEG {
+    * segment_id <<PK>>
+    --
+    * trail_id <<FK>>
+    * segment_order
+    * geom
+    color
+  }
+
+  entity "TrailTag" as TTAG {
+    * trail_tag_id <<PK>>
+    --
+    * trail_id <<FK>>
+    * tag_name
+    tag_category
+  }
+
+  entity "Waypoint" as WP {
+    * waypoint_id <<PK>>
+    --
+    * trail_id <<FK>>
+    * name
+    description
+    * latitude
+    * longitude
+    * visibility
+  }
+}
+
+
+'  ROUTE CLUSTER
+'  User -> Route -> RouteExport
+
+
+together {
+  entity "Route" as ROUTE {
+    * route_id <<PK>>
+    --
+    * user_id <<FK>>
+    * name
+    description
+    * visibility
+    * source
+    * geom
+    upload_format
+  }
+
+  entity "RouteExport" as REXP {
+    * export_id <<PK>>
+    --
+    * route_id <<FK>>
+    * format
+  }
+}
+
+'  REVIEW CLUSTER
+'  Trail -> Review -> Photos, Tags
+
+
+together {
+  entity "Review" as REV {
+    * review_id <<PK>>
+    --
+    * trail_id <<FK>>
+    * user_id <<FK>>
+    * stars
+    comment
+    * difficulty
+    parking
+    conditions
+    * activity_type
+    * activity_date
+  }
+
+  entity "ReviewPhoto" as RPHOTO {
+    * photo_id <<PK>>
+    --
+    * review_id <<FK>>
+    * image_url
+    caption
+  }
+
+  entity "ReviewTag" as RTAG {
+    * review_tag_id <<PK>>
+    --
+    * review_id <<FK>>
+    * tag_name
+    tag_category
+  }
+}
+
+
+'  SHOP CLUSTER
+'  User -> Cart -> CartItem <- Product
+'  User -> Order -> OrderItem <- Product
+'  Payment -> Order
+
+together {
+  entity "Cart" as CART {
+    * cart_id <<PK>>
+    --
+    * user_id <<FK>>
+  }
+
+  entity "Order" as ORD {
+    * order_id <<PK>>
+    --
+    * user_id <<FK>>
+    * payment_id <<FK>>
+    * status
+    * total
+  }
+
+  entity "Product" as PROD {
+    * product_id <<PK>>
+    --
+    * name
+    * price
+    * category
+    inventory
+    active
+  }
+}
+
+together {
+  entity "CartItem" as CITEM {
+    * cart_item_id <<PK>>
+    --
+    * cart_id <<FK>>
+    * product_id <<FK>>
+    * quantity
+  }
+
+  entity "OrderItem" as OITEM {
+    * order_item_id <<PK>>
+    --
+    * order_id <<FK>>
+    * product_id <<FK>>
+    * quantity
+    * unit_price
+  }
+}
+
+USER -[hidden]down- RESET
+USER -[hidden]down- SUB
+USER -[hidden]down- TRAIL
+TRAIL -[hidden]down- REV
+TRAIL -[hidden]down- GEO
+SUB -[hidden]down- PAY
+REV -[hidden]down- CART
+
+'  RELATIONSHIPS
+
+' User -> Auth
+USER     ||--o{  RESET
+USER     ||--o{  EMAIL
+
+' User -> Billing
+USER     ||--o|  SUB
+USER     ||--o{  PMETH
+
+' Billing chain
+TIER     ||--o{  SUB
+TIER     ||--o{  DEAL
+TIER     ||--o{  GIFT
+PMETH    ||--o{  PAY
+SUB      ||--o{  PAY
+PAY      ||--o|  GIFT
+PAY      ||--o|  ORD
+
+' User -> Trails & Routes
+USER     ||--o{  TRAIL
+USER     ||--o{  ROUTE
+
+' Trail chain
+TRAIL    ||--||  GEO
+TRAIL    ||--o{  SEG
+TRAIL    ||--o{  TTAG
+TRAIL    ||--o{  WP
+TRAIL    ||--o{  REV
+
+' Route chain
+ROUTE    ||--o{  REXP
+
+' Review chain
+REV      ||--o{  RPHOTO
+REV      ||--o{  RTAG
+
+' Shop
+USER     ||--||  CART
+USER     ||--o{  ORD
+CART     ||--o{  CITEM
+PROD     ||--o{  CITEM
+ORD      ||--o{  OITEM
+PROD     ||--o{  OITEM
+
+@enduml

@@ -1,0 +1,46 @@
+@startuml
+
+left to right direction
+
+package Users {
+    actor "Peak User" as PEU
+    actor "Plus User" as PLU
+    actor "Base User" as BU
+    actor "Logged Out User" as LOU
+}
+
+package Peak {
+    usecase "Identify Plants" as IP
+    usecase "Build/Customize Routes in App" as BCRA
+    usecase "Explore Community  Heatmaps" as ECH
+    package Plus {
+        usecase "Print Maps" as PM
+        usecase "Find Trails by Distance" as FTD
+        usecase "Share Live Activities w/ Friends" as SLAF
+        usecase "Preview Trails in 3D" as PT3D
+        usecase "Tour Photos along Trail" as TPT
+        usecase "Conditions Planning" as CP
+        usecase "Download Offline Maps" as DOWN
+        package Base {
+            usecase "Route Navigation" as RN
+            usecase "Saving Trails and Create Lists" as STCL
+            usecase "Log Out" as LOGOUT
+            usecase "Create Route"
+            usecase "Comment on Route"
+            usecase "Settings"
+            usecase "Manage Profile"
+            package Logged_Out {
+                usecase "Preview Trails" as PRT
+                usecase "Log In / Register" as LOGIN
+                usecase "Logged Out Homepage"
+            }
+        }
+    }
+}
+
+PEU -----> Peak
+PLU ----> Plus
+BU ----> Base
+LOU ---> Logged_Out
+
+@enduml
